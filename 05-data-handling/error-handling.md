@@ -1,87 +1,129 @@
 # Error Handling in Angular HTTP Requests
 
-## Concept
+## 1. Concept
 
-When communicating with backend APIs, errors can occur due to:
+Error handling in Angular ensures that API failures do not break the application and users receive meaningful feedback.
+
+Errors can occur due to:
 
 * network issues
-* server errors
-* invalid requests
-* authentication problems
+* server errors (500)
+* invalid requests (400)
+* authentication failures (401/403)
 
-Angular provides mechanisms to handle these errors.
+Angular handles errors using **RxJS operators**.
 
 ---
 
-## Handling Errors in HTTP Requests
+## 2. Why Error Handling Is Important
 
-Errors can be handled using the `catchError` operator from RxJS.
+Without proper error handling:
+
+* UI may crash or show empty data
+* users won’t understand what went wrong
+* debugging becomes difficult
+
+Error handling ensures application stability and better user experience.
+
+---
+
+## 3. Handling Errors Using catchError
+
+Errors are handled inside services using RxJS.
 
 Example:
 
-```typescript
+```typescript id="d4n7wq"
 import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
-getOrders() {
-  return this.http.get('/api/orders')
-    .pipe(
-      catchError(error => {
-        console.error('API error', error);
-        throw error;
-      })
-    );
+getSummary() {
+  return this.http.get('/api/dashboard').pipe(
+    catchError(error => {
+      console.error('Dashboard API Error:', error);
+      return throwError(() => error);
+    })
+  );
 }
 ```
 
 ---
 
-## Handling Errors in Components
+## 4. Handling Errors in Component
 
-```typescript
-this.orderService.getOrders().subscribe({
-  next: data => this.orders = data,
-  error: err => console.log('Failed to load orders')
+```typescript id="h3t6kp"
+this.dashboardService.getSummary().subscribe({
+  next: data => {
+    this.dashboardSummary = data;
+  },
+  error: err => {
+    this.error = true;
+  }
 });
 ```
 
 ---
 
-## Real Project Usage
+## 5. Template Handling
 
-Example scenario:
+```html id="qz7vnm"
+<div *ngIf="error">
+  Failed to load dashboard data
+</div>
+```
 
-Dashboard API fails.
-
-Instead of crashing the UI, the application shows an error message or fallback state.
+This prevents UI from breaking and shows a user-friendly message.
 
 ---
 
-## Best Practices
+## 6. Real Project Usage
 
-Handle API errors inside services.
+In the dashboard:
 
-Provide user-friendly error messages.
+* API call is made through DashboardService
+* If API fails → error is caught in service
+* Component handles error state
+* Template shows fallback message
+
+Flow:
+
+Component → Service → HttpClient → API
+→ Error → catchError → Component → UI message
+
+---
+
+## 7. Best Practices
+
+Handle errors inside services using `catchError`.
+
+Show user-friendly messages in UI.
 
 Log errors for debugging.
 
+Avoid exposing raw backend errors to users.
+
 ---
 
-## Common Mistakes
+## 8. Common Mistakes
 
-Ignoring API errors.
+Ignoring API errors completely.
 
-Handling errors in multiple places unnecessarily.
+Handling errors only in components.
 
 Showing technical error messages directly to users.
 
+Not maintaining error state in component.
+
 ---
 
-## Interview Questions
+## 9. Interview Questions
 
 How does Angular handle HTTP errors?
 
 What is `catchError`?
 
-Where should error handling logic be placed?
+Where should error handling be implemented?
 
-What happens when an HTTP request fails?
+How do you display API errors in the UI?
+
+What happens if an HTTP request fails?
