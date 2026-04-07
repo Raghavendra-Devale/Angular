@@ -1,0 +1,15 @@
+<div class="task-manager-container">
+  <div class="header">
+    <h1>Task Manager</h1>
+    <div class="filters">
+      <button class="filter-btn" (click)="setFilter('all')">All</button>
+      <button class="filter-btn" (click)="setFilter('completed')">Completed</button>
+      <button class="filter-btn" (click)="setFilter('pending')">Pending</button>
+    </div>
+  </div>
+
+  <app-add-task (add)="onAddTask($event)"></app-add-task>
+
+  <app-task-list [tasks]="tasks$ | async" (delete)="onDeleteTask($event)" (toggle)="onToggleTask($event)">
+  </app-task-list>
+</div>
